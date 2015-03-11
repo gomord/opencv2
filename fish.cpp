@@ -81,7 +81,6 @@ void set_trac_bar(const char* win_name){
 }
 void set_sliders_filter(const char * win_name, CvScalar *avg){
         g_slider_hue_max =  avg->val[0]+20 % 256;
-	printf("hue %d\n",g_slider_hue_max);
 	cvSetTrackbarPos("Hue Max",win_name,g_slider_hue_max );
         g_slider_sat_max =  avg->val[1]+30;
 	cvSetTrackbarPos("Sat Max",win_name,g_slider_sat_max );
@@ -140,6 +139,7 @@ int main( int argc, char** argv ) {
 			cvShowImage("Camera",cl_frame_temp);
 		}
 		else{
+			printf("not draw\n");
 			draw_box(frame,msPrm.box);
 
 			cvShowImage("Camera",frame);
