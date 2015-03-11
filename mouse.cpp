@@ -92,8 +92,7 @@ int main( int argc, char* argv[] ) {
 	cvDestroyWindow( "Box Example" );
 }
 #endif
-void moti_mouse_callback(
-			 int event, int x, int y, int flags, void* param )
+void moti_mouse_callback(int event, int x, int y, int flags, void* param )
 {
 
 	MouseParams*  msPrm = (MouseParams*) param;
@@ -107,20 +106,25 @@ void moti_mouse_callback(
 		break;
 	case CV_EVENT_MOUSEMOVE: {
 		if( msPrm->isDrawing ) {
-			width_temp  = x-msPrm->box.x;
-			height_temp = y-msPrm->box.y;
+			width_temp  = x - msPrm->start_x;
+			height_temp = y - msPrm->start_y;
+			//printf("mw %d, mh %d\n",width_temp,height_temp);
+			//printf("mx %d, my %d\n",x,y);
 			if(width_temp < 0  ) {
-				msPrm->box.x    += width_temp;
-				msPrm->box.width = width_temp * -1;
+				msPrm->box.x    = x;
+				msPrm->box.width = -width_temp;
 			}
 			else{
+				msPrm->box.x     = msPrm->start_x;
 				msPrm->box.width = width_temp;
 			}
+
 			if(height_temp<0 ) {
-				msPrm->box.y     += height_temp;
-				msPrm->box.height = height_temp * -1;
+				msPrm->box.y      = y;
+				msPrm->box.height = -height_temp ;
 			}
 			else{
+				msPrm->box.y	  = msPrm->start_y;
 				msPrm->box.height = height_temp;
 			}
 		}
@@ -129,6 +133,8 @@ void moti_mouse_callback(
 	case CV_EVENT_LBUTTONDOWN: {
 		msPrm->isDrawing = true;
 		//printf("BD\n");
+		msPrm->start_x = x;
+		msPrm->start_y = y;
 		msPrm->box = cvRect( x, y, 0, 0 );
 	}
 		break;

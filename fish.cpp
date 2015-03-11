@@ -107,6 +107,7 @@ int main( int argc, char** argv ) {
 	cvNamedWindow( "Camera", CV_WINDOW_NORMAL);
 	g_capture = cvCreateCameraCapture( 0 );
 	frame = cvQueryFrame( g_capture );
+	cvCvtColor(frame,frame,CV_RGB2HSV);
 	cl_frame = cvCloneImage(frame);
 	cl_frame_temp = cvCloneImage(frame);
 	frameSize = cvGetSize(frame);
@@ -125,7 +126,6 @@ int main( int argc, char** argv ) {
 		frame = cvQueryFrame( g_capture );
 		if(msPrm.isDrawing){
 			//printf("is dr\n");
-
 			cvCopyImage(cl_frame,cl_frame_temp);
 			cvSetImageROI(cl_frame_temp,msPrm.box);
 			avgScalar = cvAvg(cl_frame_temp,NULL);
@@ -139,9 +139,7 @@ int main( int argc, char** argv ) {
 			cvShowImage("Camera",cl_frame_temp);
 		}
 		else{
-			printf("not draw\n");
 			draw_box(frame,msPrm.box);
-
 			cvShowImage("Camera",frame);
 			cvCvtColor(frame,frame,CV_RGB2HSV);
 			cvCopyImage(frame,cl_frame);
@@ -155,6 +153,7 @@ int main( int argc, char** argv ) {
 		if( c == 27 ) break;
 	}
 	cvReleaseImage( &cl_frame );
+	cvReleaseImage( &cl_frame_temp );
 	cvReleaseCapture( &g_capture );
 	cvDestroyWindow( "set_HSV" );
 	cvDestroyWindow( "Camera" );
