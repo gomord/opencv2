@@ -145,8 +145,9 @@ int main( int argc, char** argv ) {
 			cvCopyImage(frame,cl_frame);
 			cvSmooth( frame, frame, CV_GAUSSIAN, 3, 3 );
 			cvInRangeS(frame,g_hsv_min,g_hsv_max,gr_frame);
-			cvErode(gr_frame,gr_frame,NULL,4);
-			cvDilate(gr_frame,gr_frame,NULL,4);
+			cvErode(gr_frame,gr_frame,NULL,8);
+			cvDilate(gr_frame,gr_frame,NULL,10);
+			cvErode(gr_frame,gr_frame,NULL,10);
 		}
 		cvShowImage( "set_HSV", gr_frame );
 		char c = (char)cvWaitKey(10);
