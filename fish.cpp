@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
-#include "cv.h"
+#include <cv.h>
 #include "highgui.h"
 
 using namespace std;
