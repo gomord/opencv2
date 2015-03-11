@@ -34,6 +34,7 @@ int mouse(const char *win_name,MouseParams* mouseParams){
 			  );
 	return 0;
 }
+#if 0
 int main( int argc, char* argv[] ) {
 
 	box = cvRect(-1,-1,0,0);
@@ -90,13 +91,14 @@ int main( int argc, char* argv[] ) {
 	cvReleaseImage( &temp );
 	cvDestroyWindow( "Box Example" );
 }
-
+#endif
 void moti_mouse_callback(
 			 int event, int x, int y, int flags, void* param )
 {
 
 	MouseParams*  msPrm = (MouseParams*) param;
-
+	int width_temp  = 0;
+	int height_temp = 0;
 	switch( event ) {
 	case CV_EVENT_RBUTTONDOWN: {
 		msPrm->isDrawing = false;
@@ -105,8 +107,16 @@ void moti_mouse_callback(
 		break;
 	case CV_EVENT_MOUSEMOVE: {
 		if( msPrm->isDrawing ) {
-			msPrm->box.width  = x-msPrm->box.x;
+			width_temp= x-msPrm->box.x;
 			msPrm->box.height = y-msPrm->box.y;
+			if(width_temp < 0  ) {
+				msPrm->box.x += width_temp;
+				msPrm->box.width = width_temp * -1;
+			}
+			if(height_temp<0 ) {
+				msPrm->box.y += height_temp;
+				msPrm->box.height=height_temp * -1;
+			}
 		}
 	}
 		break;
@@ -119,15 +129,8 @@ void moti_mouse_callback(
 	case CV_EVENT_LBUTTONUP: {
 		msPrm->isDrawing = false;
 		//printf("BU\n");
-		if(msPrm->box.width<0  ) {
-			msPrm->box.x += msPrm->box.width;
-			msPrm->box.width *=-1;
-		}
-		if(msPrm->box.height<0 ) {
-			msPrm->box.y += msPrm->box.height;
-			msPrm->box.height*=-1;
-		}
-		draw_box( msPrm->image,msPrm->box);
+
+//		draw_box( msPrm->image,msPrm->box);
 	}
 		break;
 	}
