@@ -107,15 +107,21 @@ void moti_mouse_callback(
 		break;
 	case CV_EVENT_MOUSEMOVE: {
 		if( msPrm->isDrawing ) {
-			width_temp= x-msPrm->box.x;
-			msPrm->box.height = y-msPrm->box.y;
+			width_temp  = x-msPrm->box.x;
+			height_temp = y-msPrm->box.y;
 			if(width_temp < 0  ) {
-				msPrm->box.x += width_temp;
+				msPrm->box.x    += width_temp;
 				msPrm->box.width = width_temp * -1;
 			}
+			else{
+				msPrm->box.width = width_temp;
+			}
 			if(height_temp<0 ) {
-				msPrm->box.y += height_temp;
-				msPrm->box.height=height_temp * -1;
+				msPrm->box.y     += height_temp;
+				msPrm->box.height = height_temp * -1;
+			}
+			else{
+				msPrm->box.height = height_temp;
 			}
 		}
 	}
