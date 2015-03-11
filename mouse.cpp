@@ -1,6 +1,6 @@
 #include <cv.h>
 #include <highgui.h>
-
+#include "mouse.h"
 // Define our callback which we will install for
 // mouse events.
 //
@@ -24,11 +24,6 @@ void draw_box( IplImage* img, CvRect box ) {
 		     cvScalar(0xff,0x00,0x00)    /* red */
 		    );
 }
-typedef struct MouseParams{
-	IplImage* image;
-	CvRect    box;
-	int       isDrawing;
-} MouseParams;
 int mouse(const char *win_name,MouseParams* mouseParams){
 	printf("win_name - %s\n",win_name);
 	//	CvRect* box = (CvRect *)malloc(sizeof(CvRect));
