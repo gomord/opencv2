@@ -1,10 +1,10 @@
 #include <stdio.h>
-#include <iostream>
-#include <fstream>
+//#include <iostream>
+//#include <fstream>
 #include <cv.h>
 #include "highgui.h"
 #include "mouse.h"
-using namespace std;
+//using namespace std;
 
 int        g_slider_hue_max= 186;
 int        g_slider_hue_min= 123;
@@ -79,18 +79,18 @@ void set_trac_bar(const char* win_name){
 			onTrackbarSlide
 			);
 }
-void set_sliders_filter(const char * win_name, CvScalar *avg){
-        g_slider_hue_max =  avg->val[0]+20 % 256;
+void set_sliders_filter(const char * win_name, CvScalar *avg,CvScalar *stn){
+        g_slider_hue_max =  avg->val[0]+2*stn->val[0];
 	cvSetTrackbarPos("Hue Max",win_name,g_slider_hue_max );
-        g_slider_sat_max =  avg->val[1]+30;
+        g_slider_sat_max =  avg->val[1]+4*stn->val[1];
 	cvSetTrackbarPos("Sat Max",win_name,g_slider_sat_max );
-        g_slider_val_max =  avg->val[2]+30;
+        g_slider_val_max =  avg->val[2]+4*stn->val[2];
 	cvSetTrackbarPos("Val Max",win_name,g_slider_val_max );
-        g_slider_hue_min =  avg->val[0]-20;
+        g_slider_hue_min =  avg->val[0]-2*stn->val[0];
 	cvSetTrackbarPos("Hue Min",win_name,g_slider_hue_min );
-        g_slider_sat_min =  avg->val[1]-30;
+        g_slider_sat_min =  avg->val[1]-4*stn->val[1];
 	cvSetTrackbarPos("Sat Min",win_name,g_slider_sat_min );
-        g_slider_val_min =  avg->val[2]-30;
+        g_slider_val_min =  avg->val[2]-4*stn->val[2];
 	cvSetTrackbarPos("Val Min",win_name,g_slider_val_min );
 	onTrackbarSlide(0);
 
@@ -103,11 +103,12 @@ int main( int argc, char** argv ) {
 	IplImage* gr_frame;
 	CvSize    frameSize ;
 	CvScalar  avgScalar;
+	CvScalar  stnScalar;
 	cvNamedWindow( "set_HSV", CV_WINDOW_NORMAL);
 	cvNamedWindow( "Camera", CV_WINDOW_NORMAL);
 	g_capture = cvCreateCameraCapture( 0 );
 	frame = cvQueryFrame( g_capture );
-	cvCvtColor(frame,frame,CV_RGB2HSV);
+//	cvCvtColor(frame,frame,CV_RGB2HSV);
 	cl_frame = cvCloneImage(frame);
 	cl_frame_temp = cvCloneImage(frame);
 	frameSize = cvGetSize(frame);
@@ -123,34 +124,43 @@ int main( int argc, char** argv ) {
 
 	frames = 0;
 	while(1) {
-		frame = cvQueryFrame( g_capture );
 		if(msPrm.isDrawing){
 			//printf("is dr\n");
-			cvCopyImage(cl_frame,cl_frame_temp);
+			cvCopy(cl_frame,cl_frame_temp);
 			cvSetImageROI(cl_frame_temp,msPrm.box);
-			avgScalar = cvAvg(cl_frame_temp,NULL);
-			set_sliders_filter("set_HSV",&avgScalar);
-			printf("avg h - %f s - %f v - %f\n",avgScalar.val[0],
+			cvAvgSdv(cl_frame_temp,&avgScalar,&stnScalar,NULL);
+			set_sliders_filter("set_HSV",&avgScalar,&stnScalar);
+			printf("avg h - %f s - %f v - %f\n",
+			       avgScalar.val[0],
 			       avgScalar.val[1],
 			       avgScalar.val[2]
+			       );
+			printf("avg hs - %f ss - %f vs - %f\n",
+			       stnScalar.val[0],
+			       stnScalar.val[1],
+			       stnScalar.val[2]
 			       );
 			cvResetImageROI(cl_frame_temp);
 			draw_box(cl_frame_temp,msPrm.box);
 			cvShowImage("Camera",cl_frame_temp);
 		}
 		else{
-			draw_box(frame,msPrm.box);
+
+			frame = cvQueryFrame( g_capture );
+			if(msPrm.box.width != 0){
+				draw_box(frame,msPrm.box);
+			}
 			cvShowImage("Camera",frame);
-			cvCvtColor(frame,frame,CV_RGB2HSV);
-			cvCopyImage(frame,cl_frame);
 			cvSmooth( frame, frame, CV_GAUSSIAN, 3, 3 );
+			cvCvtColor(frame,frame,CV_RGB2HSV);
+			cvCopy(frame,cl_frame);
 			cvInRangeS(frame,g_hsv_min,g_hsv_max,gr_frame);
-			cvErode(gr_frame,gr_frame,NULL,8);
-			cvDilate(gr_frame,gr_frame,NULL,10);
-			cvErode(gr_frame,gr_frame,NULL,10);
+			cvErode(gr_frame,gr_frame,NULL,2);
+			cvDilate(gr_frame,gr_frame,NULL,2);
+//			cvErode(gr_frame,gr_frame,NULL,10);
 		}
 		cvShowImage( "set_HSV", gr_frame );
-		char c = (char)cvWaitKey(10);
+		char c = (char)cvWaitKey(25);
 		if( c == 27 ) break;
 	}
 	cvReleaseImage( &cl_frame );
