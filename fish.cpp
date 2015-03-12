@@ -95,7 +95,10 @@ void set_sliders_filter(const char * win_name, CvScalar *avg,CvScalar *stn){
 	onTrackbarSlide(0);
 
 }
+
 int main( int argc, char** argv ) {
+	CvMoments mom;
+	CvPoint fishPos;
 	MouseParams msPrm;
 	IplImage* frame;
 	IplImage* cl_frame;
@@ -150,6 +153,10 @@ int main( int argc, char** argv ) {
 			if(msPrm.box.width != 0){
 				draw_box(frame,msPrm.box);
 			}
+			else{
+				cvCircle(frame,fishPos,sqrt(mom.m00)/2
+					 ,cvScalar(0x00,0x00,0x00));
+			}
 			cvShowImage("Camera",frame);
 			cvSmooth( frame, frame, CV_GAUSSIAN, 3, 3 );
 			cvCvtColor(frame,frame,CV_RGB2HSV);
@@ -157,6 +164,9 @@ int main( int argc, char** argv ) {
 			cvInRangeS(frame,g_hsv_min,g_hsv_max,gr_frame);
 			cvErode(gr_frame,gr_frame,NULL,2);
 			cvDilate(gr_frame,gr_frame,NULL,2);
+			cvMoments(gr_frame,&mom,1);
+			fishPos.x = (mom.m10/mom.m00);
+			fishPos.y = (mom.m01/mom.m00);
 //			cvErode(gr_frame,gr_frame,NULL,10);
 		}
 		cvShowImage( "set_HSV", gr_frame );
