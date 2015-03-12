@@ -81,17 +81,17 @@ void set_trac_bar(const char* win_name){
 }
 void set_sliders_filter(const char * win_name, CvScalar *avg,CvScalar *stn){
         g_slider_hue_max =  avg->val[0]+2*stn->val[0];
-	cvSetTrackbarPos("Hue Max",win_name,g_slider_hue_max );
+	//cvSetTrackbarPos("Hue Max",win_name,g_slider_hue_max );
         g_slider_sat_max =  avg->val[1]+4*stn->val[1];
-	cvSetTrackbarPos("Sat Max",win_name,g_slider_sat_max );
+	//cvSetTrackbarPos("Sat Max",win_name,g_slider_sat_max );
         g_slider_val_max =  avg->val[2]+4*stn->val[2];
-	cvSetTrackbarPos("Val Max",win_name,g_slider_val_max );
+	//cvSetTrackbarPos("Val Max",win_name,g_slider_val_max );
         g_slider_hue_min =  avg->val[0]-2*stn->val[0];
-	cvSetTrackbarPos("Hue Min",win_name,g_slider_hue_min );
+	//cvSetTrackbarPos("Hue Min",win_name,g_slider_hue_min );
         g_slider_sat_min =  avg->val[1]-4*stn->val[1];
-	cvSetTrackbarPos("Sat Min",win_name,g_slider_sat_min );
+	//cvSetTrackbarPos("Sat Min",win_name,g_slider_sat_min );
         g_slider_val_min =  avg->val[2]-4*stn->val[2];
-	cvSetTrackbarPos("Val Min",win_name,g_slider_val_min );
+	//cvSetTrackbarPos("Val Min",win_name,g_slider_val_min );
 	onTrackbarSlide(0);
 
 }
@@ -107,7 +107,7 @@ int main( int argc, char** argv ) {
 	CvSize    frameSize ;
 	CvScalar  avgScalar;
 	CvScalar  stnScalar;
-	cvNamedWindow( "set_HSV", CV_WINDOW_NORMAL);
+	//cvNamedWindow( "set_HSV", CV_WINDOW_NORMAL);
 	cvNamedWindow( "Camera", CV_WINDOW_NORMAL);
 	g_capture = cvCreateCameraCapture( 0 );
 	frame = cvQueryFrame( g_capture );
@@ -116,7 +116,7 @@ int main( int argc, char** argv ) {
 	cl_frame_temp = cvCloneImage(frame);
 	frameSize = cvGetSize(frame);
 	gr_frame = cvCreateImage(frameSize,IPL_DEPTH_8U,1);
-	set_trac_bar("set_HSV");
+//	set_trac_bar("set_HSV");
 	onTrackbarSlide(0);
 	msPrm.isDrawing = false;
 	msPrm.image = cl_frame;
@@ -169,14 +169,14 @@ int main( int argc, char** argv ) {
 			fishPos.y = (mom.m01/mom.m00);
 //			cvErode(gr_frame,gr_frame,NULL,10);
 		}
-		cvShowImage( "set_HSV", gr_frame );
+		//cvShowImage( "set_HSV", gr_frame );
 		char c = (char)cvWaitKey(25);
 		if( c == 27 ) break;
 	}
 	cvReleaseImage( &cl_frame );
 	cvReleaseImage( &cl_frame_temp );
 	cvReleaseCapture( &g_capture );
-	cvDestroyWindow( "set_HSV" );
+	//cvDestroyWindow( "set_HSV" );
 	cvDestroyWindow( "Camera" );
 	return(0);
 }
