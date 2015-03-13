@@ -97,9 +97,9 @@ void set_sliders_filter(const char * win_name, CvScalar *avg,CvScalar *stn){
 }
 
 int main( int argc, char** argv ) {
-	CvMoments mom;
-	CvPoint fishPos;
-	MouseParams msPrm;
+	CvMoments mom = {0};
+	CvPoint fishPos = {0,0};
+	MouseParams msPrm = {0};
 	IplImage* frame;
 	IplImage* cl_frame;
 	IplImage* cl_frame_temp;
@@ -109,27 +109,26 @@ int main( int argc, char** argv ) {
 	CvScalar  stnScalar;
 	//cvNamedWindow( "set_HSV", CV_WINDOW_NORMAL);
 	cvNamedWindow( "Camera", CV_WINDOW_NORMAL);
-	g_capture = cvCreateCameraCapture( 0 );
-	frame = cvQueryFrame( g_capture );
-//	cvCvtColor(frame,frame,CV_RGB2HSV);
-	cl_frame = cvCloneImage(frame);
-	cl_frame_temp = cvCloneImage(frame);
-	frameSize = cvGetSize(frame);
-	gr_frame = cvCreateImage(frameSize,IPL_DEPTH_8U,1);
+	g_capture	= cvCreateCameraCapture( 0 );
+	frame		= cvQueryFrame( g_capture );
+	cvCvtColor(frame,frame,CV_RGB2HSV);
+	cl_frame	= cvCloneImage(frame);
+	cl_frame_temp	= cvCloneImage(frame);
+	frameSize	= cvGetSize(frame);
+	gr_frame	= cvCreateImage(frameSize,IPL_DEPTH_8U,1);
 //	set_trac_bar("set_HSV");
 	onTrackbarSlide(0);
 	msPrm.isDrawing = false;
-	msPrm.image = cl_frame;
-	msPrm.box = cvRect( 0, 0, 1, 1 );
+	msPrm.image	= cl_frame;
+	msPrm.box	= cvRect( 0, 0, 1, 1 );
 	mouse("Camera",&msPrm);
 	//printf("hacked frames %d w %d h %d\n",frames,tmpw,tmph);
 
 
-	frames = 0;
 	while(1) {
 		if(msPrm.isDrawing){
 			//printf("is dr\n");
-			cvCopy(cl_frame,cl_frame_temp);
+			cvCopy(frame,cl_frame_temp);
 			cvSetImageROI(cl_frame_temp,msPrm.box);
 			cvAvgSdv(cl_frame_temp,&avgScalar,&stnScalar,NULL);
 			set_sliders_filter("set_HSV",&avgScalar,&stnScalar);
@@ -144,21 +143,25 @@ int main( int argc, char** argv ) {
 			       stnScalar.val[2]
 			       );
 			cvResetImageROI(cl_frame_temp);
+			cvCvtColor(cl_frame_temp,cl_frame_temp,CV_HSV2RGB);
 			draw_box(cl_frame_temp,msPrm.box);
 			cvShowImage("Camera",cl_frame_temp);
 		}
 		else{
 
 			frame = cvQueryFrame( g_capture );
-			if(msPrm.box.width != 0){
-				draw_box(frame,msPrm.box);
-			}
-			else{
-				cvCircle(frame,fishPos,sqrt(mom.m00)/2
-					 ,cvScalar(0x00,0x00,0x00));
-			}
-			cvShowImage("Camera",frame);
+	//		if(msPrm.box.width != 0){
+	//			draw_box(frame,msPrm.box);
+	//		}
+	//		else{
+	//		}
 			cvSmooth( frame, frame, CV_GAUSSIAN, 3, 3 );
+			cvCircle(frame,
+				 fishPos,
+				 sqrt(mom.m00)/2,
+				 cvScalar(0x00,0x00,0x00)
+				 );
+			cvShowImage("Camera",frame);
 			cvCvtColor(frame,frame,CV_RGB2HSV);
 			cvCopy(frame,cl_frame);
 			cvInRangeS(frame,g_hsv_min,g_hsv_max,gr_frame);
