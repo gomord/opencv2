@@ -80,17 +80,17 @@ void set_trac_bar(const char* win_name){
 			);
 }
 void set_sliders_filter(const char * win_name, CvScalar *avg,CvScalar *stn){
-        g_slider_hue_max =  avg->val[0]+2*stn->val[0];
+        g_slider_hue_max =  avg->val[0]+1*stn->val[0];
 	//cvSetTrackbarPos("Hue Max",win_name,g_slider_hue_max );
-        g_slider_sat_max =  avg->val[1]+4*stn->val[1];
+        g_slider_sat_max =  avg->val[1]+2*stn->val[1];
 	//cvSetTrackbarPos("Sat Max",win_name,g_slider_sat_max );
-        g_slider_val_max =  avg->val[2]+4*stn->val[2];
+        g_slider_val_max =  avg->val[2]+2*stn->val[2];
 	//cvSetTrackbarPos("Val Max",win_name,g_slider_val_max );
-        g_slider_hue_min =  avg->val[0]-2*stn->val[0];
+        g_slider_hue_min =  avg->val[0]-1*stn->val[0];
 	//cvSetTrackbarPos("Hue Min",win_name,g_slider_hue_min );
-        g_slider_sat_min =  avg->val[1]-4*stn->val[1];
+        g_slider_sat_min =  avg->val[1]-2*stn->val[1];
 	//cvSetTrackbarPos("Sat Min",win_name,g_slider_sat_min );
-        g_slider_val_min =  avg->val[2]-4*stn->val[2];
+        g_slider_val_min =  avg->val[2]-2*stn->val[2];
 	//cvSetTrackbarPos("Val Min",win_name,g_slider_val_min );
 	onTrackbarSlide(0);
 
@@ -158,7 +158,7 @@ int main( int argc, char** argv ) {
 			cvSmooth( frame, frame, CV_GAUSSIAN, 3, 3 );
 			cvCircle(frame,
 				 fishPos,
-				 sqrt(mom.m00)/2,
+				 sqrt(mom.m00)/1,
 				 cvScalar(0x00,0x00,0x00)
 				 );
 			cvShowImage("Camera",frame);
