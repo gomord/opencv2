@@ -1,3 +1,4 @@
+#! python2.7
 import numpy as np
 import cv2
 import time
@@ -5,7 +6,7 @@ import random
 age = 30
 img_len = 2**9
 img_size = (img_len,img_len*2,3)
-greds = ["mazal tov moti!!","we love you!!"]
+greds = ["mazal tov dudi!!","we love you!!"]
 
 # Create a black image
 img = np.zeros(img_size, np.uint8)
