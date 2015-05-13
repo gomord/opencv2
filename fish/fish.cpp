@@ -110,6 +110,10 @@ int main( int argc, char** argv ) {
 	//cvNamedWindow( "set_HSV", CV_WINDOW_NORMAL);
 	cvNamedWindow( "Camera", CV_WINDOW_NORMAL);
 	g_capture	= cvCreateCameraCapture( 0 );
+	if(g_capture == NULL){
+		printf("no camra in comp\n");
+		exit(0);
+	}
 	frame		= cvQueryFrame( g_capture );
 	cvCvtColor(frame,frame,CV_RGB2HSV);
 	cl_frame	= cvCloneImage(frame);
