@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 //#include <iostream>
 //#include <fstream>
 #include <cv.h>
@@ -79,7 +80,7 @@ void set_trac_bar(const char* win_name){
 			onTrackbarSlide
 			);
 }
-void set_sliders_filter(const char * win_name, CvScalar *avg,CvScalar *stn){
+void set_sliders_filter_hsv(const char * win_name, CvScalar *avg,CvScalar *stn){
         g_slider_hue_max =  avg->val[0]+1*stn->val[0];
 	//cvSetTrackbarPos("Hue Max",win_name,g_slider_hue_max );
         g_slider_sat_max =  avg->val[1]+2*stn->val[1];
@@ -95,8 +96,27 @@ void set_sliders_filter(const char * win_name, CvScalar *avg,CvScalar *stn){
 	onTrackbarSlide(0);
 
 }
+void set_sliders_filter(const char * win_name, CvScalar *avg,CvScalar *stn){
+        g_slider_hue_max =  avg->val[0]+2*stn->val[0];
+	//cvSetTrackbarPos("Hue Max",win_name,g_slider_hue_max );
+        g_slider_sat_max =  avg->val[1]+2*stn->val[1];
+	//cvSetTrackbarPos("Sat Max",win_name,g_slider_sat_max );
+        g_slider_val_max =  avg->val[2]+2*stn->val[2];
+	//cvSetTrackbarPos("Val Max",win_name,g_slider_val_max );
+        g_slider_hue_min =  avg->val[0]-2*stn->val[0];
+	//cvSetTrackbarPos("Hue Min",win_name,g_slider_hue_min );
+        g_slider_sat_min =  avg->val[1]-2*stn->val[1];
+	//cvSetTrackbarPos("Sat Min",win_name,g_slider_sat_min );
+        g_slider_val_min =  avg->val[2]-2*stn->val[2];
+	//cvSetTrackbarPos("Val Min",win_name,g_slider_val_min );
+	onTrackbarSlide(0);
 
+}
+clock_t begin, end;
+double	time_spent;
 int main( int argc, char** argv ) {
+	
+	int mod = 0;
 	CvMoments mom = {0};
 	CvPoint fishPos = {0,0};
 	MouseParams msPrm = {0};
@@ -128,7 +148,7 @@ int main( int argc, char** argv ) {
 	mouse("Camera",&msPrm);
 	//printf("hacked frames %d w %d h %d\n",frames,tmpw,tmph);
 
-
+	begin = clock();
 	while(1) {
 		if(msPrm.isDrawing){
 			//printf("is dr\n");
@@ -147,13 +167,17 @@ int main( int argc, char** argv ) {
 			       stnScalar.val[2]
 			       );
 			cvResetImageROI(cl_frame_temp);
-			cvCvtColor(cl_frame_temp,cl_frame_temp,CV_HSV2RGB);
+			//cvCvtColor(cl_frame_temp,cl_frame_temp,CV_HSV2RGB);
 			draw_box(cl_frame_temp,msPrm.box);
+			if(!(++mod&0x3))
 			cvShowImage("Camera",cl_frame_temp);
 		}
 		else{
 
 			frame = cvQueryFrame( g_capture );
+			if(!(++mod&0x3))
+			cvShowImage("Camera",frame);
+#if 1
 	//		if(msPrm.box.width != 0){
 	//			draw_box(frame,msPrm.box);
 	//		}
@@ -165,8 +189,9 @@ int main( int argc, char** argv ) {
 				 sqrt(mom.m00)/1,
 				 cvScalar(0x00,0x00,0x00)
 				 );
+			//if(!(++mod&0x3))
 			cvShowImage("Camera",frame);
-			cvCvtColor(frame,frame,CV_RGB2HSV);
+			//cvCvtColor(frame,frame,CV_RGB2HSV);
 			cvCopy(frame,cl_frame);
 			cvInRangeS(frame,g_hsv_min,g_hsv_max,gr_frame);
 			cvErode(gr_frame,gr_frame,NULL,2);
@@ -175,11 +200,16 @@ int main( int argc, char** argv ) {
 			fishPos.x = (mom.m10/mom.m00);
 			fishPos.y = (mom.m01/mom.m00);
 //			cvErode(gr_frame,gr_frame,NULL,10);
+#endif
 		}
 		//cvShowImage( "set_HSV", gr_frame );
-		char c = (char)cvWaitKey(25);
+		char c = (char)cvWaitKey(05);
 		if( c == 27 ) break;
 	}
+	end = clock();
+	time_spent = (double)(end - begin)/CLOCKS_PER_SEC;
+	printf("time of prog %f, numframe %d,numframe for sec %d\n",
+		time_spent,mod,mod/(int)time_spent);
 	cvReleaseImage( &cl_frame );
 	cvReleaseImage( &cl_frame_temp );
 	cvReleaseCapture( &g_capture );
