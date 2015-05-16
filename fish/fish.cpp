@@ -150,6 +150,7 @@ int main( int argc, char** argv ) {
 
 	begin = clock();
 	while(1) {
+	mod++;
 		if(msPrm.isDrawing){
 			//printf("is dr\n");
 			cvCopy(frame,cl_frame_temp);
@@ -175,24 +176,23 @@ int main( int argc, char** argv ) {
 		else{
 
 			frame = cvQueryFrame( g_capture );
-			if(!(++mod&0x3))
-			cvShowImage("Camera",frame);
+//			if(!(++mod&0x3))
+//			cvShowImage("Camera",frame);
 #if 1
 	//		if(msPrm.box.width != 0){
 	//			draw_box(frame,msPrm.box);
 	//		}
 	//		else{
 	//		}
-			cvSmooth( frame, frame, CV_GAUSSIAN, 3, 3 );
 			cvCircle(frame,
 				 fishPos,
 				 sqrt(mom.m00)/1,
 				 cvScalar(0x00,0x00,0x00)
 				 );
 			//if(!(++mod&0x3))
+			cvSmooth( frame, frame, CV_GAUSSIAN, 3, 3 );
 			cvShowImage("Camera",frame);
 			//cvCvtColor(frame,frame,CV_RGB2HSV);
-			cvCopy(frame,cl_frame);
 			cvInRangeS(frame,g_hsv_min,g_hsv_max,gr_frame);
 			cvErode(gr_frame,gr_frame,NULL,2);
 			cvDilate(gr_frame,gr_frame,NULL,2);
