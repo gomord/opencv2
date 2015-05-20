@@ -39,7 +39,7 @@ handler(int sig, siginfo_t *si, void *uc)
 //	(timer_create*)callback_timers[timer](timer);
 }
 void defualt_callback(int timer){
-	printf("// turn off gpio\n %d",timer);
+	printf("// turn off gpio %d\n",timer);
 }
 static int init_timers(){
 	int i;
@@ -58,8 +58,10 @@ static int init_timers(){
 		sev[i].sigev_signo = SIG;
 		sev[i].sigev_value.sival_int = i;
 		callback_timers[i] = defualt_callback;
-		if (timer_create(CLOCKID, &sev[i], &timerid[i]) == -1)
+		if (timer_create(CLOCKID, &sev[i], &timerid[i]) == -1){
+			printf("timer id %d\n",i);
 			errExit("timer_create");
+		}
 
 
 	}
@@ -71,8 +73,10 @@ static int set_timer(int timer,int sec,int nsec){
 	its.it_value.tv_nsec =nsec;
 	its.it_interval.tv_sec = 0;
 	its.it_interval.tv_nsec =0;
-	if (timer_settime(timerid, 0, &its, NULL) == -1)
+	if (timer_settime(timerid[timer], 0, &its, NULL) == -1){
+		printf("timer id %d\n",timer);
 		errExit("timer_settime");
+	}
 	return 0;
 
 }
@@ -85,25 +89,32 @@ int init_motor(int max_x,int max_y){
 int set_motor(int x,int y){
 	if(x > g_max_x*3/4){
 		//to dogpio set
+		printf("set LEFT_MOTOR x-%d\n",x);
 		set_timer(LEFT_MOTOR,0,INT_NSEC);
 	}
 	if(x < g_max_x*1/4){
 		//to dogpio set
+		printf("set RIGHT_MOTOR x-%d\n",x);
 		set_timer(RIGHT_MOTOR,0,INT_NSEC);
 	}
 	if(y > g_max_y*3/4){
 		//to dogpio set
+		printf("set UP_MOTOR y-%d\n",y);
 		set_timer(UP_MOTOR,0,INT_NSEC);
 	}
 	if(y > g_max_y*1/4){
 		//to dogpio set
+		printf("set DOWN_MOTOR y-%d\n",y);
 		set_timer(DOWN_MOTOR,0,INT_NSEC);
 	}
 }
 int main(){
 	char c;
+	init_motor(10,10);
+
 	while(c != 27){
 		c = getchar();
+		set_motor(c - '0',c - '0');
 		printf("%c\n",c);
 	}
 
