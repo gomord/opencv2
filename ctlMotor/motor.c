@@ -99,8 +99,8 @@ int init_motor(int max_x,int max_y){
 		motor_io[i] = i;
 		pinMode(motor_io[i], OUTPUT);
 	}
-	setreuid(PI_UID,PI_UID);
-	setregid(PI_GID,PI_GID);
+	setuid(PI_UID);
+	setgid(PI_GID);
 	init_timers();
 }
 int set_motor(int motor){
@@ -112,8 +112,9 @@ int set_motor(int motor){
 	if(ts->tv_sec == (time_t)0 && ts->tv_nsec == 0){
 		printf("set motor x=%d\n",motor);
 		digitalWrite (motor_io[motor], HIGH) ;	// On
-		set_timer(motor,INT_SEC,INT_NSEC);
 	}
+
+	set_timer(motor,INT_SEC,INT_NSEC);
 }
 int set_motors(int x,int y){
 	struct itimerspec curr_vall;
