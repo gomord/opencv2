@@ -123,27 +123,27 @@ void set_sliders_filter(const char * win_name, CvScalar *avg,CvScalar *stn){
 }
 clock_t begin, end;
 double	time_spent;
-CvScalar  g_avgScalar;
-CvScalar  g_stnScalar;
 MouseParams g_msPrm = {0};
-int set_avg_pos( IplImage* cl_frame){
-	cvSetImageROI(cl_frame,g_msPrm.box);
-	cvAvgSdv(cl_frame,&g_avgScalar,&g_stnScalar,NULL);
-	set_sliders_filter("set_HSV",&g_avgScalar,&g_stnScalar);
+int set_avg_pos( IplImage* frame){
+	CvScalar  avgScalar;
+	CvScalar  stnScalar;
+	cvSetImageROI(frame,g_msPrm.box);
+	cvAvgSdv(frame,&avgScalar,&stnScalar,NULL);
+	set_sliders_filter("set_HSV",&avgScalar,&stnScalar);
 	printf("avg h - %f s - %f v - %f\n",
-			g_avgScalar.val[0],
-			g_avgScalar.val[1],
-			g_avgScalar.val[2]
+			avgScalar.val[0],
+			avgScalar.val[1],
+			avgScalar.val[2]
 	      );
 	printf("avg hs - %f ss - %f vs - %f\n",
-			g_stnScalar.val[0],
-			g_stnScalar.val[1],
-			g_stnScalar.val[2]
+			stnScalar.val[0],
+			stnScalar.val[1],
+			stnScalar.val[2]
 	      );
-	cvResetImageROI(cl_frame);
-	//cvCvtColor(cl_frame,cl_frame,CV_HSV2RGB);
-	draw_box(cl_frame,g_msPrm.box);
-	cvShowImage("Camera",cl_frame);
+	cvResetImageROI(frame);
+	//cvCvtColor(frame,frame,CV_HSV2RGB);
+	draw_box(frame,g_msPrm.box);
+	cvShowImage("Camera",frame);
 	return 0;
 
 }
