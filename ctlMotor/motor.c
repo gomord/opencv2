@@ -1,5 +1,7 @@
 
+#include <wiringPi.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <signal.h>
@@ -18,13 +20,16 @@
 #define INT_MSEC 0//100
 #define INT_NSEC INT_MSEC*1000000 //
 #define MAX_TIMERS 4
+#define MAX_MOTORS 4
+#define PI_UID 1000
+#define PI_GID 1000
 int g_max_x;
 int g_max_y;
 typedef void (*timer_callback_t)(int); // Hide the ugliness
 timer_t timerid[MAX_TIMERS];
 struct sigevent sev[MAX_TIMERS];
-unsigned char GPIO[MAX_TIMERS];
-void * callback_timers[MAX_TIMERS];
+unsigned char motor_io[MAX_TIMERS];
+void * callback_timers[MAX_MOTORS];
 static void
 handler(int sig, siginfo_t *si, void *uc)
 {
@@ -40,8 +45,9 @@ handler(int sig, siginfo_t *si, void *uc)
 	tcl(timer);
 //	(timer_create*)callback_timers[timer](timer);
 }
-void defualt_callback(int timer){
-	printf("// turn off gpio %d\n",timer);
+void defualt_callback(int motor){
+	printf("// turn off gpio %d\n",motor);
+	digitalWrite (motor_io[motor], LOW) ;	// On
 }
 static int init_timers(){
 	int i;
@@ -84,30 +90,44 @@ static int set_timer(int timer,int sec,long nsec){
 }
 
 int init_motor(int max_x,int max_y){
+	int i;
 	g_max_x = max_x;
 	g_max_y = max_y;	
+	wiringPiSetup();
+	
+	for(i=0;i<MAX_MOTORS;i++){
+		motor_io[i] = i;
+		pinMode(motor_io[i], OUTPUT);
+	}
+	setreuid(PI_UID,PI_UID);
+	setregid(PI_GID,PI_GID);
 	init_timers();
 }
-int set_motor(int x,int y){
+int set_motor(int motor){
+	struct itimerspec curr_vall;
+	struct timespec *ts;
+	//to dogpio set
+	timer_gettime(timerid[motor],&curr_vall);
+	ts = &(curr_vall.it_value);
+	if(ts->tv_sec == (time_t)0 && ts->tv_nsec == 0){
+		printf("set motor x=%d\n",motor);
+		digitalWrite (motor_io[motor], HIGH) ;	// On
+		set_timer(motor,INT_SEC,INT_NSEC);
+	}
+}
+int set_motors(int x,int y){
+	struct itimerspec curr_vall;
 	if(x > g_max_x*3/4){
-		//to dogpio set
-		printf("set LEFT_MOTOR x=%d\n",x);
-		set_timer(LEFT_MOTOR,INT_SEC,INT_NSEC);
+		set_motor(LEFT_MOTOR);
 	}
 	if(x < g_max_x*1/4){
-		//to dogpio set
-		printf("set RIGHT_MOTOR x=%d\n",x);
-		set_timer(RIGHT_MOTOR,INT_SEC,INT_NSEC);
+		set_motor(RIGHT_MOTOR);
 	}
 	if(y > g_max_y*3/4){
-		//to dogpio set
-		printf("set UP_MOTOR y=%d\n",y);
-		set_timer(UP_MOTOR,INT_SEC,INT_NSEC);
+		set_motor(UP_MOTOR);
 	}
 	if(y < g_max_y*1/4){
-		//to dogpio set
-		printf("set DOWN_MOTOR y=%d\n",y);
-		set_timer(DOWN_MOTOR,INT_SEC,INT_NSEC);
+		set_motor(DOWN_MOTOR);
 	}
 }
 int main(){
@@ -120,7 +140,7 @@ int main(){
 			if(c == 'q') break;
 			continue;
 		}
-		set_motor(c - '0',c - '0');
+		set_motors(c - '0',c - '0');
 		printf("c-%c d-%d\n",c,c-'0');
 	}
 
