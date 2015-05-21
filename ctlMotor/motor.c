@@ -14,7 +14,9 @@
 #define DOWN_MOTOR 1
 #define LEFT_MOTOR 2
 #define RIGHT_MOTOR 3
-#define INT_NSEC 400
+#define INT_SEC 2
+#define INT_MSEC 0//100
+#define INT_NSEC INT_MSEC*1000000 //
 #define MAX_TIMERS 4
 int g_max_x;
 int g_max_y;
@@ -67,7 +69,7 @@ static int init_timers(){
 	}
 	return 0;
 }
-static int set_timer(int timer,int sec,int nsec){
+static int set_timer(int timer,int sec,long nsec){
 	struct itimerspec its;
 	its.it_value.tv_sec = sec;
 	its.it_value.tv_nsec =nsec;
@@ -89,23 +91,23 @@ int init_motor(int max_x,int max_y){
 int set_motor(int x,int y){
 	if(x > g_max_x*3/4){
 		//to dogpio set
-		printf("set LEFT_MOTOR x-%d\n",x);
-		set_timer(LEFT_MOTOR,0,INT_NSEC);
+		printf("set LEFT_MOTOR x=%d\n",x);
+		set_timer(LEFT_MOTOR,INT_SEC,INT_NSEC);
 	}
 	if(x < g_max_x*1/4){
 		//to dogpio set
-		printf("set RIGHT_MOTOR x-%d\n",x);
-		set_timer(RIGHT_MOTOR,0,INT_NSEC);
+		printf("set RIGHT_MOTOR x=%d\n",x);
+		set_timer(RIGHT_MOTOR,INT_SEC,INT_NSEC);
 	}
 	if(y > g_max_y*3/4){
 		//to dogpio set
-		printf("set UP_MOTOR y-%d\n",y);
-		set_timer(UP_MOTOR,0,INT_NSEC);
+		printf("set UP_MOTOR y=%d\n",y);
+		set_timer(UP_MOTOR,INT_SEC,INT_NSEC);
 	}
-	if(y > g_max_y*1/4){
+	if(y < g_max_y*1/4){
 		//to dogpio set
-		printf("set DOWN_MOTOR y-%d\n",y);
-		set_timer(DOWN_MOTOR,0,INT_NSEC);
+		printf("set DOWN_MOTOR y=%d\n",y);
+		set_timer(DOWN_MOTOR,INT_SEC,INT_NSEC);
 	}
 }
 int main(){
@@ -114,8 +116,12 @@ int main(){
 
 	while(c != 27){
 		c = getchar();
+		if(c > '9' || c < '0'){
+			if(c == 'q') break;
+			continue;
+		}
 		set_motor(c - '0',c - '0');
-		printf("%c\n",c);
+		printf("c-%c d-%d\n",c,c-'0');
 	}
 
 }
