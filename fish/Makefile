@@ -1,6 +1,6 @@
-CC   := g++
+CC   := gcc
 LIBS := `pkg-config --libs opencv` -ldl -lm 
-ELF  := fishIn.a
+ELF  := fishIn.out
 OPTIONS = -O2 -g -Wall # -g for debug, -O2 for optimise and -Wall additional messages
 INCLUDES = `pkg-config --cflags opencv`-I . # Directory for header file
 OBJS = fish.o mouse.o # List of objects to be build
@@ -8,9 +8,9 @@ OBJS = fish.o mouse.o # List of objects to be build
 all: ${OBJS}
 	@echo "Building all" # To print "Building.." message
 	${CC} ${OBJS}  -o ${ELF} ${OPTIONS} ${LIBS} ${INCLUDES} 
-%.o: %.cpp  # % pattern wildcard matching
+%.o: %.c  # % pattern wildcard matching
 	@echo "Building " $@
-	${CC} ${OPTIONS}  -c $*.cpp ${INCLUDES} `pkg-config --cflags opencv` 
+	${CC} ${OPTIONS}  -c $*.c ${INCLUDES} `pkg-config --cflags opencv` 
 clean:
 	@echo "cleaning Up"
 	rm -rf *.o
