@@ -20,13 +20,20 @@
 #define INT_MSEC 0//100
 #define INT_NSEC INT_MSEC*1000000 //
 #define MAX_TIMERS 4
-#define MAX_MOTORS 4
+#define MAX_MOTORS MAX_TIMERS 
 #define PI_UID 1000
 #define PI_GID 1000
 int g_max_x;
 int g_max_y;
 typedef void (*timer_callback_t)(int); // Hide the ugliness
 timer_t timerid[MAX_TIMERS];
+#define TIME_ON  4
+#define TIME_OFF 3
+clock_t clocks[MAX_TIMERS];
+#define MOTOR_ON   1
+#define MOTOR_OFF  (!MOTOR_ON)
+
+int	motor_stat[MAX_MOTORS];
 struct sigevent sev[MAX_TIMERS];
 unsigned char motor_io[MAX_TIMERS];
 void * callback_timers[MAX_MOTORS];
@@ -106,12 +113,27 @@ int init_motor(int max_x,int max_y){
 int set_motor(int motor){
 	struct itimerspec curr_vall;
 	struct timespec *ts;
+	long int sec_time = 0;
 	//to dogpio set
 	timer_gettime(timerid[motor],&curr_vall);
 	ts = &(curr_vall.it_value);
 	if(ts->tv_sec == (time_t)0 && ts->tv_nsec == 0){
 		printf("set motor x=%d\n",motor);
+		clocks[motor] = time(NULL);
 		digitalWrite (motor_io[motor], HIGH) ;	// On
+	}
+	else{
+		sec_time = (time(NULL) - clocks[motor])%(TIME_ON + TIME_OFF);
+		//printf("sec_time x=%ld clock = %ld clocks_mot = %ld\n",sec_time,time(NULL), clocks[motor]);
+		if(motor_stat[motor] == MOTOR_ON && sec_time >= TIME_ON){
+			motor_stat[motor] = MOTOR_OFF;
+			digitalWrite (motor_io[motor], LOW) ;	// Off
+			
+		}
+		else if(motor_stat[motor] == MOTOR_OFF && sec_time < TIME_ON){
+			motor_stat[motor] = MOTOR_ON;
+			digitalWrite (motor_io[motor], HIGH) ;	// On
+		}	
 	}
 
 	set_timer(motor,INT_SEC,INT_NSEC);
@@ -148,8 +170,9 @@ int main(){
 }
 int exit_timers(){
 	int i;
-	for(i=0; i<MAX_TIMERS;i++){
-	}
+	//for(i=0; i<MAX_TIMERS;i++){
+	//}
 	return 0;
 	
 }
+
