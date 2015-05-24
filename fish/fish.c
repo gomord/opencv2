@@ -159,16 +159,15 @@ int set_range_pos( IplImage* frame){
 	cvShowImage("Camera",frame);
 	return 0;
 }
-int main( int argc, char** argv ) {
-	
-	int mod = 0;
-	CvMoments mom = {0};
-	CvPoint fishPos = {0,0};
-	IplImage* frame;
-	IplImage* cl_frame;
-	IplImage* cl_frame_temp;
-	IplImage* gr_frame;
-	CvSize    frameSize ;
+CvMoments mom = {0};
+CvPoint fishPos = {0,0};
+IplImage* frame;
+IplImage* cl_frame;
+IplImage* cl_frame_temp;
+IplImage* gr_frame;
+CvSize    frameSize ;
+
+int init_fish(){
 	cvNamedWindow( "set_HSV", CV_WINDOW_NORMAL);
 	cvNamedWindow( "Camera", CV_WINDOW_NORMAL);
 	set_mouse_bar("Camera");
@@ -190,73 +189,84 @@ int main( int argc, char** argv ) {
 	g_msPrm.image	= cl_frame;
 	g_msPrm.box	= cvRect( 0, 0, 1, 1 );
 	mouse("Camera",&g_msPrm);
+return 0;
 
 
+}
+	
+
+int mod = 0;
+void get_fish_pos(){
+	mod++;
+	if(g_msPrm.isDrawing){
+		cvCopy(frame,cl_frame,NULL);
+		switch(g_mouse){
+		case AVG_POS:
+			set_avg_pos(cl_frame);
+		break;
+		case RANGE_POS:
+			set_range_pos(cl_frame);
+		break;
+
+		default:
+		break;
+		}
+	}
+	else{
+
+		frame = cvQueryFrame( g_capture );
+//			if(!(++mod&0x3))
+//			cvShowImage("Camera",frame);
+#if 1
+//		if(g_msPrm.box.width != 0){
+//			draw_box(frame,g_msPrm.box);
+//		}
+//		else{
+//		}
+		cvCircle(frame,
+			 fishPos,
+			 sqrt(mom.m00)/1,
+			 cvScalar(0x00,0x00,0x00,0),1,8,0
+			 );
+		//if(!(++mod&0x3))
+		cvShowImage("Camera",frame);
+		if(g_is_range){
+			cvSetImageROI(frame,g_range);
+			cvSetZero(gr_frame);
+			cvSetImageROI(gr_frame,g_range);
+		}
+
+		cvSmooth( frame, frame, CV_GAUSSIAN, 3, 3 ,0,0);
+		//cvCvtColor(frame,frame,CV_RGB2HSV);
+		cvInRangeS(frame,g_hsv_min,g_hsv_max,gr_frame);
+
+		if(g_is_range){
+			cvSetImageROI(frame,g_range);
+		}
+		cvErode(gr_frame,gr_frame,NULL,2);
+		cvDilate(gr_frame,gr_frame,NULL,2);
+		if(g_is_range){
+			cvResetImageROI(frame);
+			cvResetImageROI(gr_frame);
+		}
+		cvMoments(gr_frame,&mom,1);
+		fishPos.x = (mom.m10/mom.m00);
+		fishPos.y = (mom.m01/mom.m00);
+
+		cvShowImage( "set_HSV", gr_frame );
+//			cvErode(gr_frame,gr_frame,NULL,10);
+#endif
+	}
+
+}
+int main( int argc, char** argv ) {
+	init_fish();	
 	//init_motor(frameSize.width,frameSize.height);
 	//printf("hacked frames %d w %d h %d\n",frames,tmpw,tmph);
 
 	begin = clock();
 	while(1) {
-		mod++;
-		if(g_msPrm.isDrawing){
-			cvCopy(frame,cl_frame,NULL);
-			switch(g_mouse){
-			case AVG_POS:
-				set_avg_pos(cl_frame);
-			break;
-			case RANGE_POS:
-				set_range_pos(cl_frame);
-			break;
-
-			default:
-			break;
-			}
-		}
-		else{
-
-			frame = cvQueryFrame( g_capture );
-//			if(!(++mod&0x3))
-//			cvShowImage("Camera",frame);
-#if 1
-	//		if(g_msPrm.box.width != 0){
-	//			draw_box(frame,g_msPrm.box);
-	//		}
-	//		else{
-	//		}
-			cvCircle(frame,
-				 fishPos,
-				 sqrt(mom.m00)/1,
-				 cvScalar(0x00,0x00,0x00,0),1,8,0
-				 );
-			//if(!(++mod&0x3))
-			cvShowImage("Camera",frame);
-			if(g_is_range){
-				cvSetImageROI(frame,g_range);
-				cvSetZero(gr_frame);
-				cvSetImageROI(gr_frame,g_range);
-			}
-
-			cvSmooth( frame, frame, CV_GAUSSIAN, 3, 3 ,0,0);
-			//cvCvtColor(frame,frame,CV_RGB2HSV);
-			cvInRangeS(frame,g_hsv_min,g_hsv_max,gr_frame);
-
-			if(g_is_range){
-				cvSetImageROI(frame,g_range);
-			}
-			cvErode(gr_frame,gr_frame,NULL,2);
-			cvDilate(gr_frame,gr_frame,NULL,2);
-			if(g_is_range){
-				cvResetImageROI(frame);
-				cvResetImageROI(gr_frame);
-			}
-			cvMoments(gr_frame,&mom,1);
-			fishPos.x = (mom.m10/mom.m00);
-			fishPos.y = (mom.m01/mom.m00);
-
-			cvShowImage( "set_HSV", gr_frame );
-//			cvErode(gr_frame,gr_frame,NULL,10);
-#endif
-		}
+		get_fish_pos();
 		//cvShowImage( "set_HSV", gr_frame );
 		char c = (char)cvWaitKey(05);
 		if( c == 27 ) break;

@@ -1,5 +1,7 @@
 CC   := gcc
-LIBS := `pkg-config --libs opencv` -ldl -lm 
+MOTOR_PATH :=./../ctlMotor
+
+LIBS := `pkg-config --libs opencv` -ldl -lm -lmotor -L${MOTOR_PATH} -W1,rpath=${MOTOR_PATH}
 ELF  := fishIn.out
 OPTIONS = -O2 -g -Wall # -g for debug, -O2 for optimise and -Wall additional messages
 INCLUDES = `pkg-config --cflags opencv`-I . # Directory for header file
