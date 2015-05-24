@@ -12,6 +12,8 @@ int        g_slider_sat_min = 89;
 int        g_slider_val_max = 249;
 int        g_slider_val_min = 81;
 int        g_mouse	    = 0;
+CvRect	   g_range ;
+int	   g_is_range = 0;
 CvScalar   g_hsv_max;
 CvScalar   g_hsv_min;
 CvCapture* g_capture         = NULL;
@@ -147,6 +149,15 @@ int set_avg_pos( IplImage* frame){
 	return 0;
 
 }
+int set_range_pos( IplImage* frame){
+	draw_box(frame,g_msPrm.box);
+	g_range = g_msPrm.box;
+	printf("range %d %d %d %d\n",
+		g_range.x,g_range.y,g_range.width,g_range.height);
+	g_is_range = 1;
+	cvShowImage("Camera",frame);
+	return 0;
+}
 int main( int argc, char** argv ) {
 	
 	int mod = 0;
@@ -157,7 +168,7 @@ int main( int argc, char** argv ) {
 	IplImage* cl_frame_temp;
 	IplImage* gr_frame;
 	CvSize    frameSize ;
-	//cvNamedWindow( "set_HSV", CV_WINDOW_NORMAL);
+	cvNamedWindow( "set_HSV", CV_WINDOW_NORMAL);
 	cvNamedWindow( "Camera", CV_WINDOW_NORMAL);
 	set_mouse_bar("Camera");
 	g_capture	= cvCreateCameraCapture( 0 );
@@ -181,19 +192,21 @@ int main( int argc, char** argv ) {
 
 	begin = clock();
 	while(1) {
-	mod++;
+		mod++;
 		if(g_msPrm.isDrawing){
 			cvCopy(frame,cl_frame);
-		switch(g_mouse){
-		case RANGE_POS:
-		break;
-		case AVG_POS:
-		set_avg_pos(cl_frame);
-		break;
-		default:
-		break;
+			switch(g_mouse){
+			case AVG_POS:
+				set_avg_pos(cl_frame);
+			break;
+			case RANGE_POS:
+				set_range_pos(cl_frame);
+			break;
+
+			default:
+			break;
+			}
 		}
-	}
 		else{
 
 			frame = cvQueryFrame( g_capture );
@@ -211,15 +224,31 @@ int main( int argc, char** argv ) {
 				 cvScalar(0x00,0x00,0x00)
 				 );
 			//if(!(++mod&0x3))
-			cvSmooth( frame, frame, CV_GAUSSIAN, 3, 3 );
 			cvShowImage("Camera",frame);
+			if(g_is_range){
+				cvSetImageROI(frame,g_range);
+				cvSetZero(gr_frame);
+				cvSetImageROI(gr_frame,g_range);
+			}
+
+			cvSmooth( frame, frame, CV_GAUSSIAN, 3, 3 );
 			//cvCvtColor(frame,frame,CV_RGB2HSV);
 			cvInRangeS(frame,g_hsv_min,g_hsv_max,gr_frame);
+
+			if(g_is_range){
+				cvSetImageROI(frame,g_range);
+			}
 			cvErode(gr_frame,gr_frame,NULL,2);
 			cvDilate(gr_frame,gr_frame,NULL,2);
+			if(g_is_range){
+				cvResetImageROI(frame);
+				cvResetImageROI(gr_frame);
+			}
 			cvMoments(gr_frame,&mom,1);
 			fishPos.x = (mom.m10/mom.m00);
 			fishPos.y = (mom.m01/mom.m00);
+
+			cvShowImage( "set_HSV", gr_frame );
 //			cvErode(gr_frame,gr_frame,NULL,10);
 #endif
 		}
