@@ -1,5 +1,5 @@
 
-#include <wiringPi.h>
+//#include <wiringPi.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -12,9 +12,12 @@
 
 #define errExit(msg)    do { perror(msg); exit(EXIT_FAILURE); \
 } while (0)
-#define UP_MOTOR 0
-#define DOWN_MOTOR 1
-#define LEFT_MOTOR 2
+#define OUTPUT 1
+#define LOW 0
+#define HIGH 1
+#define UP_MOTOR 1
+#define DOWN_MOTOR 2
+#define LEFT_MOTOR 0
 #define RIGHT_MOTOR 3
 #define INT_SEC 2
 #define INT_MSEC 0//100
@@ -38,6 +41,26 @@ struct sigevent sev[MAX_TIMERS];
 unsigned char motor_io[MAX_TIMERS];
 void * callback_timers[MAX_MOTORS];
 static void
+
+pinMode(int gpio, int mode){
+	
+	char command[128];
+	if(mode == OUTPUT){
+		snprintf(command, sizeof(command), "gpio write mode %d out\n",gpio);
+	}else{
+		exit(0);
+		snprintf(command, sizeof(command), "gpio write %d 1\n",gpio);
+	}
+}
+digitalWrite (int gpio, int output){
+	char command[128];
+	if(output == LOW){
+		snprintf(command, sizeof(command), "gpio write %d 0\n",gpio);
+	}else{
+		snprintf(command, sizeof(command), "gpio write %d 1\n",gpio);
+	}
+	system(command);
+} 
 handler(int sig, siginfo_t *si, void *uc)
 {
 	/* Note: calling printf() from a signal handler is not
@@ -100,7 +123,8 @@ int init_motor(int max_x,int max_y){
 	int i;
 	g_max_x = max_x;
 	g_max_y = max_y;	
-	wiringPiSetup();
+	//wiringPiSetup();
+	//wiringPiSetupGPIO();
 	
 	for(i=0;i<MAX_MOTORS;i++){
 		motor_io[i] = i;
@@ -190,10 +214,11 @@ int main(){
 
 }
 #endif// MOTOR_MAIN
-int exit_timers(){
+int exit_motors(){
 	int i;
-	//for(i=0; i<MAX_TIMERS;i++){
-	//}
+	for(i=0; i<MAX_MOTORS;i++){
+		digitalWrite (motor_io[i], LOW) ;	// Off
+	}
 	return 0;
 	
 }
