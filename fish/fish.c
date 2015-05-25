@@ -288,12 +288,12 @@ int main( int argc, char** argv ) {
 	//printf("hacked frames %d w %d h %d\n",frames,tmpw,tmph);
 
 	begin = clock();
-#if 0
+#if 1
 	while(1) {
-		//get_fish_pos();
+		get_fish_pos();
 		
-		//cvShowImage( "set_HSV", gr_frame );
-		//fish_motor(fishPos);
+		cvShowImage( "set_HSV", gr_frame );
+		fish_motor(fishPos);
 		c = (char)cvWaitKey(50);
 		if( c == 27 ) break;
 		if( c == 'c'){
@@ -307,6 +307,7 @@ int main( int argc, char** argv ) {
 #endif
 	end = clock();
 	time_spent = (double)(end - begin)/CLOCKS_PER_SEC;
+	time_spent += 1;
 	printf("time of prog %f, numframe %d,numframe for sec %d\n",
 		time_spent,mod,mod/(int)time_spent);
 	exit_fish();
