@@ -110,7 +110,7 @@ int init_motor(int max_x,int max_y){
 	setgid(PI_GID);
 	init_timers();
 }
-int set_motor(int motor){
+static int set_motor(int motor){
 	struct itimerspec curr_vall;
 	struct timespec *ts;
 	long int sec_time = 0;
@@ -153,21 +153,43 @@ int set_motors(int x,int y){
 		set_motor(DOWN_MOTOR);
 	}
 }
+int ctlMotor(char c){
+	switch(c){
+	case 'u':
+		set_motor(UP_MOTOR);
+	break;
+	case 'd':
+		set_motor(DOWN_MOTOR);
+	break;
+	case 'r':
+		set_motor(RIGHT_MOTOR);
+	break;
+	case 'l':
+		set_motor(LEFT_MOTOR);
+	break;
+	case 'q':
+		return -1;
+	break;
+	defualt:
+		return 1;
+	break;
+	}
+	return 0;
+
+}
+#ifdef MOTOR_MAIN
 int main(){
 	char c;
 	init_motor(10,10);
 
 	while(c != 27){
 		c = getchar();
-		if(c > '9' || c < '0'){
-			if(c == 'q') break;
-			continue;
-		}
-		set_motors(c - '0',c - '0');
-		printf("c-%c d-%d\n",c,c-'0');
+		if(ctlMotor(c) < 0) break;
+
 	}
 
 }
+#endif// MOTOR_MAIN
 int exit_timers(){
 	int i;
 	//for(i=0; i<MAX_TIMERS;i++){

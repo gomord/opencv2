@@ -159,6 +159,20 @@ int set_range_pos( IplImage* frame){
 	cvShowImage("Camera",frame);
 	return 0;
 }
+void fish_motor(CvPoint objPos){
+	if(g_range.x - objPos.x > 3*g_range.width/4){
+//		ctlMotor('r');
+	}	
+	else if(g_range.x - objPos.x < g_range.width/4){
+//		ctlMotor('l');
+	}	
+	if(g_range.y - objPos.y > 3*g_range.height/4){
+//		ctlMotor('d');
+	}	
+	else if(g_range.y - objPos.y < g_range.height/4){
+//		ctlMotor('u');
+	}	
+}
 CvMoments mom = {0};
 CvPoint fishPos = {0,0};
 IplImage* frame;
@@ -171,7 +185,7 @@ int init_fish(){
 	cvNamedWindow( "set_HSV", CV_WINDOW_NORMAL);
 	cvNamedWindow( "Camera", CV_WINDOW_NORMAL);
 	set_mouse_bar("Camera");
-	g_capture	= cvCreateCameraCapture( 0 );
+	g_capture = cvCreateCameraCapture( 0 );
 	if(g_capture == NULL){
 		printf("no camra in comp\n");
 		exit(0);
@@ -189,7 +203,7 @@ int init_fish(){
 	g_msPrm.image	= cl_frame;
 	g_msPrm.box	= cvRect( 0, 0, 1, 1 );
 	mouse("Camera",&g_msPrm);
-return 0;
+	return 0;
 
 
 }
@@ -259,26 +273,42 @@ void get_fish_pos(){
 	}
 
 }
-int main( int argc, char** argv ) {
-	init_fish();	
-	//init_motor(frameSize.width,frameSize.height);
-	//printf("hacked frames %d w %d h %d\n",frames,tmpw,tmph);
-
-	begin = clock();
-	while(1) {
-		get_fish_pos();
-		//cvShowImage( "set_HSV", gr_frame );
-		char c = (char)cvWaitKey(05);
-		if( c == 27 ) break;
-	}
-	end = clock();
-	time_spent = (double)(end - begin)/CLOCKS_PER_SEC;
-	printf("time of prog %f, numframe %d,numframe for sec %d\n",
-		time_spent,mod,mod/(int)time_spent);
+void exit_fish(){
 	cvReleaseImage( &cl_frame );
 	cvReleaseImage( &cl_frame_temp );
 	cvReleaseCapture( &g_capture );
 	//cvDestroyWindow( "set_HSV" );
 	cvDestroyWindow( "Camera" );
+
+}
+int main( int argc, char** argv ) {
+	char c;
+	init_fish();	
+	//init_motor(frameSize.width,frameSize.height);
+	//printf("hacked frames %d w %d h %d\n",frames,tmpw,tmph);
+
+	begin = clock();
+#if 0
+	while(1) {
+		//get_fish_pos();
+		
+		//cvShowImage( "set_HSV", gr_frame );
+		//fish_motor(fishPos);
+		c = (char)cvWaitKey(50);
+		if( c == 27 ) break;
+		if( c == 'c'){
+			while(1){
+				c = getchar();
+//				if(ctlMotor(c)<0) break;
+				
+			}
+		}
+	}
+#endif
+	end = clock();
+	time_spent = (double)(end - begin)/CLOCKS_PER_SEC;
+	printf("time of prog %f, numframe %d,numframe for sec %d\n",
+		time_spent,mod,mod/(int)time_spent);
+	exit_fish();
 	return(0);
 }
