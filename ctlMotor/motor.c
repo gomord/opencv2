@@ -31,7 +31,7 @@ int g_max_y;
 typedef void (*timer_callback_t)(int); // Hide the ugliness
 timer_t timerid[MAX_TIMERS];
 #define TIME_ON  4
-#define TIME_OFF 3
+#define TIME_OFF 1
 clock_t clocks[MAX_TIMERS];
 #define MOTOR_ON   1
 #define MOTOR_OFF  (!MOTOR_ON)
@@ -40,19 +40,19 @@ int	motor_stat[MAX_MOTORS];
 struct sigevent sev[MAX_TIMERS];
 unsigned char motor_io[MAX_TIMERS];
 void * callback_timers[MAX_MOTORS];
-static void
-
-pinMode(int gpio, int mode){
+static void pinMode(int gpio, int mode){
 	
 	char command[128];
 	if(mode == OUTPUT){
-		snprintf(command, sizeof(command), "gpio write mode %d out\n",gpio);
+		snprintf(command, sizeof(command), 
+			"gpio mode %d out\n\x00",gpio);
 	}else{
 		exit(0);
-		snprintf(command, sizeof(command), "gpio write %d 1\n",gpio);
 	}
+	printf("%s\n",command);
+	system(command);
 }
-digitalWrite (int gpio, int output){
+static void digitalWrite (int gpio, int output){
 	char command[128];
 	if(output == LOW){
 		snprintf(command, sizeof(command), "gpio write %d 0\n",gpio);
@@ -61,7 +61,7 @@ digitalWrite (int gpio, int output){
 	}
 	system(command);
 } 
-handler(int sig, siginfo_t *si, void *uc)
+static void handler(int sig, siginfo_t *si, void *uc)
 {
 	/* Note: calling printf() from a signal handler is not
 	   strictly correct, since printf() is not async-signal-safe;
