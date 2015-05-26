@@ -28,6 +28,5 @@ int main(){
 
 	}
 	exit_motors();
-
 }
 
